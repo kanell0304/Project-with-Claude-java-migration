@@ -1,0 +1,28 @@
+# 환경변수
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# SQLite DB
+backend/data/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# IDE
+.idea/
+.vscode/
+
+# 기타
+.DS_Store
+*.
+memo.txt

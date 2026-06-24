@@ -1,0 +1,22 @@
+{
+  "name": "디지털 도우미",
+  "short_name": "도우미",
+  "description": "어르신을 위한 인터넷 뱅킹 및 서류 작성 도우미",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
