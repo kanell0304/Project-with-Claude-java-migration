@@ -23,13 +23,16 @@ public class OpenAiService {
     private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
 
     private static final String BASE_SYSTEM_PROMPT = """
-            당신은 디지털 기기 사용이 어려운 어르신들을 위한 친절한 도우미입니다.
+            당신은 디지털 기기 사용이 어려운 어르신들을 위한 인터넷 뱅킹 전용 도우미입니다.
 
             역할:
             - 인터넷 뱅킹(계좌이체, 공과금 납부, OTP 발급 등) 사용 방법을 단계별로 안내합니다.
             - 금융 서류(신청서, 확인서 등) 작성 방법을 쉽게 설명합니다.
 
-            규칙:
+            반드시 지켜야 할 규칙:
+            - 인터넷 뱅킹, 금융 앱 사용, 금융 서류 작성과 무관한 질문에는 절대 답변하지 않습니다.
+            - 금융과 무관한 질문을 받으면 반드시 다음과 같이 안내합니다:
+              "저는 인터넷 뱅킹과 금융 업무만 도와드릴 수 있어요. 다른 질문은 답변이 어렵습니다."
             - 어려운 용어는 반드시 쉬운 말로 풀어 설명합니다.
             - 한 번에 하나의 단계만 안내합니다.
             - 사용자가 "다음", "했어요", "눌렀어요" 등이라고 하면 다음 단계를 안내합니다.
@@ -38,6 +41,12 @@ public class OpenAiService {
             - 항상 친절하고 천천히, 이해하기 쉬운 말로 답변합니다.
             - 답변은 짧고 명확하게 작성합니다 (한 번에 너무 많은 정보를 주지 않습니다).
             """;
+
+    // 명백한 악용 키워드 — GPT 호출 없이 즉시 차단
+    private static final List<String> BLOCKED_KEYWORDS = List.of(
+            "섹스", "야동", "성관계", "포르노", "도박", "불법", "해킹", "마약",
+            "폭탄", "살인", "자살", "테러", "욕설", "씨발", "개새끼", "병신"
+    );
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
@@ -51,6 +60,20 @@ public class OpenAiService {
     }
 
     public String getChatResponse(List<Message> messages, String guide) {
+        // 키워드 필터 — GPT 호출 없이 즉시 차단
+        String lastUserMessage = messages.stream()
+                .filter(m -> "user".equals(m.role()))
+                .reduce((first, second) -> second)
+                .map(m -> m.content())
+                .orElse("");
+
+        boolean blocked = BLOCKED_KEYWORDS.stream()
+                .anyMatch(keyword -> lastUserMessage.contains(keyword));
+
+        if (blocked) {
+            return "죄송합니다. 해당 내용은 답변드리기 어렵습니다. 인터넷 뱅킹이나 금융 업무에 대해 질문해 주세요.";
+        }
+
         String systemContent = guide == null
                 ? BASE_SYSTEM_PROMPT
                 : BASE_SYSTEM_PROMPT + "\n\n[참고 가이드]\n" + guide + "\n위 가이드를 반드시 참고하여 정확하게 안내하세요.";

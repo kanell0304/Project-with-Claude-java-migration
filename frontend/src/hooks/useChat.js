@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { sendChat } from "../lib/api";
 
-export function useChat() {
+export function useChat(token) {
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState(undefined);
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export function useChat() {
       setNeedsAppSelection(false);
 
       try {
-        const res = await sendChat(next, sessionId);
+        const res = await sendChat(next, sessionId, token);
         setSessionId(res.session_id);
         setNeedsAppSelection(res.needs_app_selection);
         if (res.model) setModel(res.model);

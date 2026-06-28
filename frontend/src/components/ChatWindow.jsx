@@ -4,13 +4,13 @@ import MessageBubble from "./MessageBubble";
 
 const QUICK_REPLIES = ["다음", "확인했어요", "완료했어요", "다시 설명해주세요"];
 
-export default function ChatWindow({ messages, loading, onExampleClick, onQuickReply }) {
+export default function ChatWindow({ messages, loading, onExampleClick, onQuickReply, token }) {
   const bottomRef = useRef(null);
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    getTasks().then(setTasks).catch(() => setTasks([]));
-  }, []);
+    getTasks(token).then(setTasks).catch(() => setTasks([]));
+  }, [token]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

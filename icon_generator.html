@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c" width="512" height="512"></canvas>
+<br>
+<button onclick="download()">PNG 다운로드</button>
+<script>
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  // 배경
+  ctx.fillStyle = '#1D4ED8';
+  ctx.roundRect(0, 0, 512, 512, 80);
+  ctx.fill();
+
+  // 말풍선 아이콘
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(100, 120, 312, 220, 30);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(160, 340);
+  ctx.lineTo(130, 400);
+  ctx.lineTo(220, 340);
+  ctx.fill();
+
+  // 점 3개
+  ctx.fillStyle = '#1D4ED8';
+  ctx.beginPath(); ctx.arc(180, 230, 22, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(256, 230, 22, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(332, 230, 22, 0, Math.PI*2); ctx.fill();
+
+  // 텍스트
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 52px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('디지털 도우미', 256, 460);
+
+  function download() {
+    const a = document.createElement('a');
+    a.download = 'icon.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+</script>
+</body>
+</html>

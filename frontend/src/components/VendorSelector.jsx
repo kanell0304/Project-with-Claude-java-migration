@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { getVendors } from "../lib/api";
 
-export default function VendorSelector({ onSelect }) {
+export default function VendorSelector({ onSelect, token }) {
   const [vendors, setVendors] = useState([]);
   const [customInput, setCustomInput] = useState("");
   const [showInput, setShowInput] = useState(false);
 
   useEffect(() => {
-    getVendors("금융").then(setVendors).catch(() => setVendors([]));
-  }, []);
+    getVendors("금융", token).then(setVendors).catch(() => setVendors([]));
+  }, [token]);
 
   const handleCustomSubmit = () => {
     const trimmed = customInput.trim();

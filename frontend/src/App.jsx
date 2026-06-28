@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "./hooks/useAuth";
 import { useChat } from "./hooks/useChat";
 import { useVoice } from "./hooks/useVoice";
 import { useTTS } from "./hooks/useTTS";
@@ -8,16 +9,16 @@ import VendorSelector from "./components/VendorSelector";
 import TTSSetup from "./components/TTSSetup";
 
 export default function App() {
+  const { token, logout, isLoggedIn } = useAuth();
   const [ttsEnabled, setTtsEnabled] = useState(null);
   const [volumeTooltip, setVolumeTooltip] = useState({ visible: false, x: 0, y: 0 });
   const tooltipTimerRef = useRef(null);
 
-  const { messages, loading, error, needsAppSelection, model, sendMessage, reset } = useChat();
+  const { messages, loading, error, needsAppSelection, model, sendMessage, reset } = useChat(token);
   const { speak, stop, speaking, volume, setVolume } = useTTS(ttsEnabled === true);
 
   const prevMessageCountRef = useRef(0);
 
-  // 새 assistant 메시지가 오면 자동으로 읽어줌
   useEffect(() => {
     if (!ttsEnabled) return;
     const lastMsg = messages[messages.length - 1];
@@ -32,7 +33,7 @@ export default function App() {
     [sendMessage]
   );
 
-  const { recording, loading: voiceLoading, error: voiceError, start, stop: stopVoice } = useVoice(handleVoiceResult);
+  const { recording, loading: voiceLoading, error: voiceError, start, stop: stopVoice } = useVoice(handleVoiceResult, token);
 
   const isInputDisabled = loading || voiceLoading;
 
@@ -67,7 +68,7 @@ export default function App() {
     );
   }
 
-  // 선택 후: 기존 채팅 화면
+  // 채팅 화면
   return (
     <div className="flex flex-col h-full max-w-2xl mx-auto">
       {volumeTooltip.visible && (
@@ -123,6 +124,25 @@ export default function App() {
           >
             새 대화
           </button>
+          {isLoggedIn ? (
+            <button
+              onClick={logout}
+              className="text-base bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-xl transition-colors"
+            >
+              로그아웃
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8081";
+                window.location.href = `${API_URL}/oauth2/authorization/kakao?lang=ko`;
+              }}
+              className="text-base px-4 py-2 rounded-xl transition-colors font-bold"
+              style={{ backgroundColor: "#FEE500", color: "#191919" }}
+            >
+              로그인
+            </button>
+          )}
         </div>
       </header>
 
@@ -131,6 +151,7 @@ export default function App() {
         loading={loading}
         onExampleClick={sendMessage}
         onQuickReply={sendMessage}
+        token={token}
       />
 
       {voiceLoading && (
@@ -149,7 +170,7 @@ export default function App() {
       )}
 
       {needsAppSelection && !isInputDisabled && (
-        <VendorSelector onSelect={(name) => sendMessage(name)} />
+        <VendorSelector onSelect={(name) => sendMessage(name)} token={token} />
       )}
 
       <InputBar

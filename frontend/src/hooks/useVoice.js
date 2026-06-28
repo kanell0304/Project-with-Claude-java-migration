@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { sendVoice } from "../lib/api";
 
-export function useVoice(onResult) {
+export function useVoice(onResult, token) {
   const [recording, setRecording] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +24,7 @@ export function useVoice(onResult) {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         setLoading(true);
         try {
-          const res = await sendVoice(blob);
+          const res = await sendVoice(blob, token);
           onResult(res.transcript);
         } catch (e) {
           setError(e.message);
