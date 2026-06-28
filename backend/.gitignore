@@ -1,5 +1,9 @@
+build/
+.gradle/
+data/
 .env
-.venv/
-__pycache__/
-*.pyc
-inf.txt
+src/main/resources/application.properties
+
+# IntelliJ
+.idea/
+*.iml

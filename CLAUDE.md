@@ -8,54 +8,71 @@
 # 기술 스택
 
 ## Backend
-- Python / FastAPI
-- OpenAI API (GPT-4o-mini, Whisper)
-- SQLite (aiosqlite) — 가이드 캐시 + 업체 목록 + 업무 목록 저장
-- 가상환경: venv
+- Java 21 / Spring Boot 3.3.5
+- Gradle
+- Spring Data JPA + Hibernate
+- PostgreSQL — 가이드 캐시 + 업체 목록 + 업무 목록 저장
+- OpenAI API (gpt-5.5, Whisper)
+- 서버 포트: 8081
 
 ## Frontend
-- Next.js (PWA)
-- TypeScript / Tailwind CSS
+- Vite + React 19 (PWA)
+- JavaScript / Tailwind CSS 4
+- Web Speech API (TTS)
 
 ## 배포
 - Git + GitHub Actions (CI/CD)
 - AWS: EC2 t3.micro (백엔드 Docker + Nginx), S3 + CloudFront (프론트), Route53 (DNS)
-- 프론트: Next.js 정적 빌드(output: export) → S3 → CloudFront
+- 프론트: Vite 정적 빌드(dist/) → S3 → CloudFront
 - 백엔드: EC2에 Docker + docker-compose + Nginx 리버스 프록시
 
 ---
 
 # 코드 규칙
 
-## Python
-- import는 반드시 **상대 경로** 사용 (절대 경로 금지)
-- 가상환경은 **venv** 사용 (miniconda 사용 안 함)
+## Java
+- 패키지: `com.digitalhelper`
+- 빌드 도구: Gradle (`./gradlew`)
+
+## JavaScript (Frontend)
+- 환경변수 prefix: `VITE_` (예: `VITE_API_URL`)
+- 컴포넌트 파일 확장자: `.jsx`, 훅/유틸: `.js`
 
 ---
 
 # 프로젝트 구조
 
 ```
-Project with Claude/
+project-with-claude-java/
 ├── CLAUDE.md
 ├── backend/
-│   ├── app/
-│   │   ├── core/        # 설정 (config.py)
-│   │   ├── db/          # database.py, guides_repo.py
-│   │   ├── models/      # Pydantic 스키마
-│   │   ├── routers/     # chat, voice, vendors, tasks
-│   │   ├── services/    # openai_service, guide_service
-│   │   └── main.py
-│   ├── data/            # guides.db (SQLite, gitignore)
+│   ├── src/main/java/com/digitalhelper/
+│   │   ├── config/      # AppConfig, DataInitializer
+│   │   ├── controller/  # Chat, Voice, Vendor, Task, Health
+│   │   ├── dto/         # ChatRequest, ChatResponse (model 필드 포함), Message, VoiceResponse
+│   │   ├── entity/      # Guide, Task, Vendor
+│   │   ├── repository/  # JPA Repositories
+│   │   ├── service/     # OpenAiService, GuideService, KeywordDetector
+│   │   └── DigitalHelperApplication.java
+│   ├── src/main/resources/
+│   │   └── application.properties
 │   ├── .env.example
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── docker-compose.yml
+│   ├── build.gradle
+│   └── settings.gradle
 └── frontend/
-    ├── app/             # Next.js App Router
-    ├── components/      # ChatWindow, MessageBubble, InputBar, VendorSelector
-    ├── hooks/           # useChat, useVoice
-    ├── lib/             # api.ts
-    └── public/          # manifest.json
+    ├── src/
+    │   ├── components/  # ChatWindow, MessageBubble, InputBar, VendorSelector, TTSSetup
+    │   ├── hooks/       # useChat, useVoice, useTTS
+    │   ├── lib/         # api.js
+    │   ├── App.jsx
+    │   ├── main.jsx
+    │   └── index.css
+    ├── public/          # manifest.json
+    ├── index.html
+    ├── vite.config.js
+    └── package.json
 ```
 
 ---
@@ -65,7 +82,7 @@ Project with Claude/
 | Method | URL | 설명 |
 |--------|-----|------|
 | GET | /health | 헬스 체크 |
-| POST | /api/v1/chat | 텍스트 채팅 |
+| POST | /api/v1/chat | 텍스트 채팅 (응답에 model 필드 포함) |
 | POST | /api/v1/voice | 음성 입력 (Whisper STT + GPT) |
 | GET | /api/v1/vendors | 업체 목록 조회 (?category=금융) |
 | GET | /api/v1/tasks | 업무 목록 조회 |
@@ -73,6 +90,15 @@ Project with Claude/
 ---
 
 # 주요 동작 흐름
+
+## TTS (음성 안내)
+- 앱 시작 또는 새 대화 시 TTS 사용 여부 선택 화면 표시
+- 사용 선택 시 AI 답변을 Web Speech API로 자동 읽어줌 (한국어, 속도 0.9)
+- 헤더에 음량 슬라이더 표시 (다음 텍스트부터 적용)
+
+## AI 모델 표시
+- 채팅 응답의 `model` 필드를 헤더 타이틀 아래 뱃지로 실시간 표시
+- `application.properties`의 `openai.model` 값이 자동 반영됨
 
 ## 가이드 캐시
 - 사용자 메시지에서 앱(토스 등) + 작업(계좌이체 등) 키워드를 대화 이력 전체에서 감지
@@ -86,7 +112,7 @@ Project with Claude/
 ## CI/CD 흐름
 - `main` 브랜치 push 시 자동 배포
 - `backend/**` 변경 → EC2 SSH 접속 → git pull → docker compose 재시작
-- `frontend/**` 변경 → Next.js 빌드 → S3 업로드 → CloudFront 캐시 무효화
+- `frontend/**` 변경 → Vite 빌드 → S3 업로드 → CloudFront 캐시 무효화
 
 ### GitHub Secrets 목록
 | 키 | 설명 |
@@ -103,6 +129,6 @@ Project with Claude/
 | `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront 배포 ID |
 
 ## DB 시딩
-- 서버 시작 시 vendors 테이블에 한국 금융기관 목록 자동 삽입 (INSERT OR IGNORE)
-- 서버 시작 시 tasks 테이블에 주요 금융 업무 목록 자동 삽입 (INSERT OR IGNORE)
+- 서버 시작 시 vendors 테이블에 한국 금융기관 목록 자동 삽입 (INSERT OR IGNORE on conflict)
+- 서버 시작 시 tasks 테이블에 주요 금융 업무 목록 자동 삽입 (INSERT OR IGNORE on conflict)
   - 계좌이체, 잔액조회, 공과금납부, OTP발급, 계좌개설, 이체한도변경
