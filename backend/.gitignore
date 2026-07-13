@@ -2,7 +2,6 @@ build/
 .gradle/
 data/
 .env
-src/main/resources/application.properties
 
 # IntelliJ
 .idea/
