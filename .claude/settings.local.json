@@ -6,7 +6,8 @@
       "Bash(npm uninstall:*)",
       "Bash(npm audit:*)",
       "Bash(npm run *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(node -e \"const {projects} = require\\('./src/data/projects'\\); console.log\\(projects.map\\(p => p.id + ': ' + p.title\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }

@@ -144,6 +144,8 @@ project-with-claude-java/
 | `EC2_USER` | EC2 접속 유저 (보통 ec2-user 또는 ubuntu) |
 | `EC2_SSH_KEY` | EC2 PEM 키 내용 |
 | `OPENAI_API_KEY` | OpenAI API 키 |
+| `DB_USERNAME` | PostgreSQL 사용자명 |
+| `DB_PASSWORD` | PostgreSQL 비밀번호 |
 | `KAKAO_CLIENT_ID` | 카카오 REST API 키 |
 | `KAKAO_CLIENT_SECRET` | 카카오 Client Secret |
 | `JWT_SECRET` | JWT 서명 시크릿 (32바이트 Base64) |

@@ -30,6 +30,11 @@ jobs:
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             OPENAI_MODEL=gpt-4o-mini
             ALLOWED_ORIGINS=["https://${{ secrets.DOMAIN }}"]
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
 
             # Docker 컨테이너 재시작
